@@ -7,10 +7,19 @@ class MoviesController < ApplicationController
   end
 
   def index
+    @all_ratings = Movie.all_ratings
     if (params.has_key?(:sort))
-      @movies = Movie.order(params[:sort] + " ASC").all
+      if (params.has_key?(:ratings)) 
+        @movies = Movie.order(params[:sort] + " ASC").where(["rating IN (?)",params[:ratings].keys]).all
+      else
+        @movies = []
+      end
     else
-      @movies = Movie.all
+      if (params.has_key?(:ratings)) 
+        @movies = Movie.where(["rating IN (?)",params[:ratings].keys]).all
+      else
+        @movies = []
+      end
     end
   end
 
