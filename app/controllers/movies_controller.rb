@@ -8,17 +8,30 @@ class MoviesController < ApplicationController
 
   def index
     @all_ratings = Movie.all_ratings
-    if (params.has_key?(:sort))
-      if (params.has_key?(:ratings)) 
+    @movies = []
+    need_redirect = false
+    if (session[:ratings] != params[:ratings] || session[:sort] != params[:sort] )
+      if (params.has_key?(:ratings))
+        session[:ratings] = params[:ratings]
+      end
+      if (params.has_key?(:sort))
+        session[:sort] = params[:sort]
+      end
+      if (session.has_key?(:ratings) && !params.has_key?(:ratings))
+        params[:ratings] = session[:ratings]
+        need_redirect = true
+      end
+      if (session.has_key?(:sort) && !params.has_key?(:sort))
+        params[:sort] = session[:sort]
+        need_redirect = true
+      end
+      redirect_to movies_path params if need_redirect
+    end
+    if (params.has_key?(:ratings)) 
+      if (params.has_key?(:sort))
         @movies = Movie.order(params[:sort] + " ASC").where(["rating IN (?)",params[:ratings].keys]).all
       else
-        @movies = []
-      end
-    else
-      if (params.has_key?(:ratings)) 
         @movies = Movie.where(["rating IN (?)",params[:ratings].keys]).all
-      else
-        @movies = []
       end
     end
   end
